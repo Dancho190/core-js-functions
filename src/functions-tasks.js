@@ -18,7 +18,7 @@
  *
  */
 function getCurrentFunctionName() {
-  throw new Error('Not implemented');
+  return getCurrentFunctionName.name;
 }
 
 /**
@@ -32,8 +32,11 @@ function getCurrentFunctionName() {
  *   getFunctionBody(hiHello) => "function hiHello() { console.log('hello world'); }"
  *
  */
-function getFunctionBody(/* func */) {
-  throw new Error('Not implemented');
+function getFunctionBody(func) {
+  if (typeof func !== 'function') {
+    return ''; // Возвращаем пустую строку, если аргумент не функция
+  }
+  return func.toString();
 }
 
 /**
@@ -50,8 +53,9 @@ function getFunctionBody(/* func */) {
  *  ]) => [0, 1, 2]
  *
  */
-function getArgumentsCount(/* funcs */) {
-  throw new Error('Not implemented');
+
+function getArgumentsCount(funcs) {
+  return funcs.map((func) => func.length);
 }
 
 /**
@@ -70,8 +74,10 @@ function getArgumentsCount(/* funcs */) {
  *   power05(16) => 4
  *
  */
-function getPowerFunction(/* exponent */) {
-  throw new Error('Not implemented');
+function getPowerFunction(exponent) {
+  return function (x) {
+    return x ** exponent;
+  };
 }
 
 /**
@@ -87,8 +93,19 @@ function getPowerFunction(/* exponent */) {
  *   getPolynom(8)     => y = 8
  *   getPolynom()      => null
  */
-function getPolynom() {
-  throw new Error('Not implemented');
+function getPolynom(...coefficients) {
+  if (coefficients.length === 0) return null;
+
+  // Реверсируем коэффициенты один раз, чтобы они шли от самой высокой степени
+  const reversedCoefficients = coefficients.reverse();
+
+  // Возвращаем функцию, которая вычисляет значение полинома для переданного x
+  return function (x) {
+    return reversedCoefficients.reduce(
+      (acc, coeff, index) => acc + coeff * x ** index,
+      0
+    ); // Используем оператор возведения в степень
+  };
 }
 
 /**
@@ -105,8 +122,17 @@ function getPolynom() {
  *   ...
  *   memoizer() => the same random number  (next run, returns the previous cached result)
  */
-function memoize(/* func */) {
-  throw new Error('Not implemented');
+function memoize(func) {
+  let cachedResult; // Для хранения кэшированного результата
+  let isCalled = false; // Флаг для проверки, был ли вызван func
+
+  return function (...args) {
+    if (!isCalled) {
+      cachedResult = func(...args); // Вызываем функцию только в первый раз
+      isCalled = true; // Устанавливаем флаг, что функция уже была вызвана
+    }
+    return cachedResult; // Возвращаем кэшированный результат
+  };
 }
 
 /**
@@ -124,8 +150,19 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  return function () {
+    let lastError;
+    for (let i = 0; i < attempts; i += 1) {
+      // Replace i++ with i = i + 1
+      try {
+        return func(); // Try calling the passed function
+      } catch (error) {
+        lastError = error; // Save the error if it occurs
+      }
+    }
+    throw lastError; // If all attempts failed, throw the last error
+  };
 }
 
 /**
@@ -151,8 +188,23 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return function (...args) {
+    // Create the argument string by converting each argument to a string and joining them with a comma
+    const argsString = args.map((arg) => JSON.stringify(arg)).join(',');
+
+    // Log the start of the function call
+    logFunc(`${func.name}(${argsString}) starts`);
+
+    // Call the original function and store the result
+    const result = func(...args);
+
+    // Log the end of the function call
+    logFunc(`${func.name}(${argsString}) ends`);
+
+    // Return the result of the original function
+    return result;
+  };
 }
 
 /**
@@ -168,8 +220,14 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  return function (...args2) {
+    // Combine the partial arguments passed initially with the new ones
+    const allArgs = [...args1, ...args2];
+
+    // If the original function expects fewer or more arguments, we call the function directly
+    return fn(...allArgs);
+  };
 }
 
 /**
@@ -189,8 +247,14 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  let currentId = startFrom;
+
+  return function () {
+    const id = currentId;
+    currentId += 1; // Manually incrementing
+    return id;
+  };
 }
 
 module.exports = {
